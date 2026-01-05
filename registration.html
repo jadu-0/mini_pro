@@ -85,13 +85,14 @@
   }
 
   function validatePassword(p){
-    // Exactly 1-8 characters, at least 1 uppercase, 1 lowercase, 1 special char
-    if(typeof p !== 'string') return false;
-    if(p.length < 1 || p.length > 8) return false;
-    if(!/[A-Z]/.test(p)) return false;
-    if(!/[a-z]/.test(p)) return false;
-    if(!/[^A-Za-z0-9]/.test(p)) return false;
-    return true;
+    // Return an object with ok + message to explain failures
+    const out = { ok: false, message: null };
+    if(typeof p !== 'string') { out.message = 'Invalid password format'; return out; }
+    if(p.length < 1 || p.length > 8) { out.message = 'Password length must be between 1 and 8 characters'; return out; }
+    if(!/[A-Z]/.test(p)) { out.message = 'Password must include at least one uppercase letter'; return out; }
+    if(!/[a-z]/.test(p)) { out.message = 'Password must include at least one lowercase letter'; return out; }
+    if(!/[^A-Za-z0-9]/.test(p)) { out.message = 'Password must include at least one special character'; return out; }
+    out.ok = true; return out;
   }
 
   function getUsers(){
@@ -116,8 +117,9 @@
     let valid=true;
     const name = nameEl.value.trim();
     const email = emailEl.value.trim().toLowerCase();
-    const pass = passEl.value;
-    const confirm = confirmEl.value;
+  // Trim leading/trailing whitespace from password fields to avoid accidental spaces
+  const pass = passEl.value.trim();
+  const confirm = confirmEl.value.trim();
     const dob = dobEl.value;
     const phone = phoneEl.value.trim();
 
@@ -130,7 +132,8 @@
 
     if(!/^\d+$/.test(phone)){ showError('phoneError','Phone must be numbers only'); valid=false; }
 
-    if(!validatePassword(pass)){ showError('passError','Password must be 1-8 chars and include uppercase, lowercase and a special character'); valid=false; }
+  const passCheck = validatePassword(pass);
+  if(!passCheck.ok){ showError('passError', passCheck.message); valid=false; }
 
     if(pass !== confirm){ showError('confirmError','Passwords do not match'); valid=false; }
 
