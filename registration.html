@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register - Auth App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <main class="card" aria-labelledby="reg-title">
+      <div class="header">
+        <div class="logo" aria-hidden></div>
+        <div>
+          <div id="reg-title" class="title">Create your account</div>
+          <div class="subtitle">Secure sign up — Glassmorphism UI</div>
+        </div>
+      </div>
+
+  <form id="regForm" class="form" novalidate>
+        <div class="row">
+          <div class="input">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required />
+            <div class="helper error" id="nameError"></div>
+          </div>
+          <div class="input">
+            <label for="dob">DOB</label>
+            <input id="dob" name="dob" type="date" required />
+            <div class="helper error" id="dobError"></div>
+          </div>
+        </div>
+
+        <div class="input">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+          <div class="helper error" id="emailError"></div>
+        </div>
+
+        <div class="row">
+          <div class="input">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9]*" required />
+            <div class="helper error" id="phoneError"></div>
+          </div>
+          <div class="input">
+            <label for="pass">Password</label>
+            <input id="pass" name="pass" type="password" required />
+            <div class="helper error" id="passError"></div>
+          </div>
+        </div>
+
+        <div class="input">
+          <label for="confirm">Confirm Password</label>
+          <input id="confirm" name="confirm" type="password" required />
+          <div class="helper error" id="confirmError"></div>
+        </div>
+
+  <button type="submit" class="btn">Register</button>
+  <div id="regGeneral" class="note" style="margin-top:8px"></div>
+
+  <div class="footer">Already have an account? <a class="link" href="login.html">Login</a></div>
+      </form>
+    </main>
+  </div>
+
+<script>
+// Registration logic with strict password rules
+(function(){
+  const form = document.getElementById('regForm');
+  const nameEl = document.getElementById('name');
+  const emailEl = document.getElementById('email');
+  const passEl = document.getElementById('pass');
+  const confirmEl = document.getElementById('confirm');
+  const dobEl = document.getElementById('dob');
+  const phoneEl = document.getElementById('phone');
+
+  function showError(id,msg){
+    document.getElementById(id).textContent = msg || '';
+  }
+
+  function validateEmail(email){
+    // basic RFC-like check
+    return /^\S+@\S+\.\S+$/.test(email);
+  }
+
+  function validatePassword(p){
+    // Exactly 1-8 characters, at least 1 uppercase, 1 lowercase, 1 special char
+    if(typeof p !== 'string') return false;
+    if(p.length < 1 || p.length > 8) return false;
+    if(!/[A-Z]/.test(p)) return false;
+    if(!/[a-z]/.test(p)) return false;
+    if(!/[^A-Za-z0-9]/.test(p)) return false;
+    return true;
+  }
+
+  function getUsers(){
+    try{
+      return JSON.parse(localStorage.getItem('users')||'[]');
+    }catch(e){return []}
+  }
+
+  function saveUser(user){
+    const users = getUsers();
+    users.push(user);
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    console.debug('Registration submit clicked');
+    // clear errors
+    ['nameError','emailError','passError','confirmError','phoneError','dobError'].forEach(id=>showError(id,''));
+    document.getElementById('regGeneral').textContent = '';
+
+    let valid=true;
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim().toLowerCase();
+    const pass = passEl.value;
+    const confirm = confirmEl.value;
+    const dob = dobEl.value;
+    const phone = phoneEl.value.trim();
+
+    console.debug({name,email,pass,confirm,dob,phone});
+
+    if(!name){ showError('nameError','Please enter your name'); valid=false; }
+    if(!dob){ showError('dobError','Please provide your date of birth'); valid=false; }
+
+    if(!validateEmail(email)){ showError('emailError','Enter a valid email'); valid=false; }
+
+    if(!/^\d+$/.test(phone)){ showError('phoneError','Phone must be numbers only'); valid=false; }
+
+    if(!validatePassword(pass)){ showError('passError','Password must be 1-8 chars and include uppercase, lowercase and a special character'); valid=false; }
+
+    if(pass !== confirm){ showError('confirmError','Passwords do not match'); valid=false; }
+
+    if(!valid){
+      document.getElementById('regGeneral').textContent = 'Please fix the errors above and try again.';
+      console.debug('Validation failed');
+      return;
+    }
+
+    // Prevent duplicate email
+    const users = getUsers();
+    if(users.some(u=>u.email === email)){
+      showError('emailError','An account with this email already exists');
+      document.getElementById('regGeneral').textContent = 'Duplicate email - please login or use another email.';
+      console.debug('Duplicate email for', email);
+      return;
+    }
+
+    const user = { name, email, password: pass, dob, phone };
+    saveUser(user);
+    console.debug('User saved', user);
+    // Redirect to login page
+    location.href = 'login.html';
+  });
+})();
+</script>
+</body>
+</html>

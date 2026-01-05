@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home - Auth App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <main class="card" aria-labelledby="home-title">
+      <div class="header">
+        <div class="logo" aria-hidden></div>
+        <div>
+          <div id="home-title" class="title">Home</div>
+          <div class="subtitle">Your dashboard</div>
+        </div>
+      </div>
+
+      <div class="form" id="content">
+        <div class="input">
+          <label>Welcome message</label>
+          <div id="welcome" style="font-size:1.15rem;font-weight:600"></div>
+        </div>
+
+        <button id="logout" class="btn" style="background:#ef4444">Logout</button>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  function getCurrent(){
+    try{return JSON.parse(localStorage.getItem('currentUser')||'null')}catch(e){return null}
+  }
+  const user = getCurrent();
+  const welcome = document.getElementById('welcome');
+  const logout = document.getElementById('logout');
+
+  if(!user){
+    // Not logged in - redirect to login
+    location.href = 'login.html';
+  }else{
+    welcome.textContent = 'Welcome, ' + (user.name || user.email || 'User');
+  }
+
+  logout.addEventListener('click', function(){
+    localStorage.removeItem('currentUser');
+    // Optionally keep users list
+    location.href = 'login.html';
+  });
+})();
+</script>
+</body>
+</html>"}}]}] }

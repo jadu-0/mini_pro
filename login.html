@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login - Auth App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <main class="card" aria-labelledby="login-title">
+      <div class="header">
+        <div class="logo" aria-hidden></div>
+        <div>
+          <div id="login-title" class="title">Welcome back</div>
+          <div class="subtitle">Sign in to continue</div>
+        </div>
+      </div>
+
+      <form id="loginForm" class="form" novalidate>
+        <div class="input">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+          <div class="helper error" id="emailError"></div>
+        </div>
+        <div class="input">
+          <label for="pass">Password</label>
+          <input id="pass" name="pass" type="password" required />
+          <div class="helper error" id="passError"></div>
+        </div>
+
+        <button type="submit" class="btn">Login</button>
+        <div class="note" id="generalMsg"></div>
+        <div class="footer">Don't have an account? <a class="link" href="registration.html">Register</a></div>
+      </form>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const form = document.getElementById('loginForm');
+  const emailEl = document.getElementById('email');
+  const passEl = document.getElementById('pass');
+  const emailErr = document.getElementById('emailError');
+  const passErr = document.getElementById('passError');
+  const generalMsg = document.getElementById('generalMsg');
+
+  function getUsers(){
+    try{return JSON.parse(localStorage.getItem('users')||'[]')}catch(e){return []}
+  }
+
+  function setCurrent(user){
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    emailErr.textContent = '';
+    passErr.textContent = '';
+    generalMsg.textContent = '';
+
+    const email = emailEl.value.trim().toLowerCase();
+    const pass = passEl.value;
+    const users = getUsers();
+
+    if(!email || !pass){
+      if(!email) emailErr.textContent = 'Email is required';
+      if(!pass) passErr.textContent = 'Password is required';
+      return;
+    }
+
+    const foundByEmail = users.find(u=>u.email === email);
+    const foundByPass = users.find(u=>u.password === pass);
+
+    if(!foundByEmail && !foundByPass){
+      generalMsg.textContent = 'Email and password is wrong';
+      generalMsg.className = 'note error';
+      return;
+    }
+    if(!foundByEmail){
+      emailErr.textContent = 'Email id is wrong';
+      return;
+    }
+    if(!foundByPass){
+      passErr.textContent = 'Password is wrong';
+      return;
+    }
+
+    // Both exist - ensure they belong to same user
+    if(foundByEmail.email !== foundByPass.email){
+      generalMsg.textContent = 'Email and password is wrong';
+      generalMsg.className = 'note error';
+      return;
+    }
+
+    setCurrent(foundByEmail);
+    location.href = 'home.html';
+  });
+})();
+</script>
+</body>
+</html>
